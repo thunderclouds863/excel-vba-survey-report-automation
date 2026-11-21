@@ -1,50 +1,41 @@
 Attribute VB_Name = "frmDeleteData"
-Attribute VB_Base = "0{4AFAB9B1-C97E-4FB0-BFCE-AC556BC4189E}{BFF2022C-655B-4C9A-A4AB-CE2A04BB652D}"
+Attribute VB_Base = "0{F142B7F9-6187-48B2-AA95-F42A930787C4}{267166C1-4BBE-4E19-865B-6917A887FC8E}"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Attribute VB_TemplateDerived = False
 Attribute VB_Customizable = False
-Option Explicit
-
-Public ws As Worksheet
-Public colFilter As Long   ' Kolom untuk filter data
-Public keyword As String   ' Keyword search
-Private dataArr() As Variant ' Array untuk menampung data cepat
-
-Private Sub UserForm_Initialize()
-    Dim lastRow As Long, i As Long, dict As Object
+Private Sub btnSearch_Click()
+    Dim ws As Worksheet, lastRow As Long, i As Long
+    Dim key As String
+    key = txtKeyword.text
+    If key = "" Then
+        MsgBox "Please enter keyword.", vbExclamation
+        Exit Sub
+    End If
+    
     Set ws = ThisWorkbook.Sheets("Data")
-    Set dict = CreateObject("Scripting.Dictionary")
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
     
-    lastRow = ws.Cells(ws.Rows.Count, colFilter).End(xlUp).Row
-    If lastRow < 2 Then Exit Sub
-    
-    ' Load seluruh kolom ke array
-    dataArr = ws.Range(ws.Cells(2, colFilter), ws.Cells(lastRow, colFilter)).value
-    
-    ' Populate ListBox dengan dictionary untuk unik + filter keyword
-    lstData.Clear
-    For i = 1 To UBound(dataArr, 1)
-        If keyword = "" Or InStr(1, dataArr(i, 1), keyword, vbTextCompare) > 0 Then
-            If Not dict.Exists(dataArr(i, 1)) Then
-                dict(dataArr(i, 1)) = 1
-                lstData.AddItem dataArr(i, 1)
-            End If
+    lstResult.Clear
+    For i = 2 To lastRow
+        If InStr(1, ws.Cells(i, 1).Value & " " & ws.Cells(i, 2).Value & " " & ws.Cells(i, 6).Value, key, vbTextCompare) > 0 Then
+            lstResult.AddItem ws.Cells(i, 1).Value & " | " & ws.Cells(i, 6).Value
         End If
     Next i
+    
+    If lstResult.ListCount = 0 Then MsgBox "No matching data found.", vbInformation
 End Sub
 
 Private Sub btnDelete_Click()
-    Dim i As Long, lastRow As Long
-    Dim cell As Range
+    Dim ws As Worksheet, lastRow As Long, i As Long, r As Long
     Dim selectedItems As Collection
     Set selectedItems = New Collection
+    Set ws = ThisWorkbook.Sheets("Data")
     
-    ' Ambil data yang dicentang
-    For i = 0 To lstData.ListCount - 1
-        If lstData.Selected(i) Then selectedItems.Add lstData.List(i)
+    For i = 0 To lstResult.ListCount - 1
+        If lstResult.Selected(i) Then selectedItems.Add lstResult.List(i)
     Next i
     
     If selectedItems.Count = 0 Then
@@ -52,11 +43,19 @@ Private Sub btnDelete_Click()
         Exit Sub
     End If
     
-    ' Loop dari bawah ke atas untuk hapus baris di sheet
-    lastRow = ws.Cells(ws.Rows.Count, colFilter).End(xlUp).Row
-    Dim r As Long
+    If MsgBox("Delete selected keyword data?", vbYesNo + vbExclamation) <> vbYes Then Exit Sub
+    
+    lastRow = ws.Cells(ws.Rows.Count, 1).End(xlUp).Row
     For r = lastRow To 2 Step -1
         For i = 1 To selectedItems.Count
-            If ws.Cells(r, colFilter).value = selectedItems(i) Then
+            If InStr(1, ws.Cells(r, 1).Value & " | " & ws.Cells(r, 6).Value, selectedItems(i), vbTextCompare) > 0 Then
                 ws.Rows(r).Delete
+                Exit For
+            End If
+        Next i
+    Next r
+    
+    MsgBox "Selected keyword data deleted.", vbInformation
+    Unload Me
+End Sub
 
