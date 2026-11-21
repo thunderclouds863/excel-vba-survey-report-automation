@@ -4,7 +4,7 @@ An Excel macro workbook for a customer survey on education media (posters) at ca
 
 Built during my internship at the Customer Assistance Center, PT Toyota-Astra Motor (2025–2026).
 
-> **Data removed.** This repository holds a template only. All survey responses, customer names, interviewer names, photo links, results and the pivot cache were deleted before publishing. Sheets keep their headers, layout, formulas and buttons.
+> **Data removed.** This repository holds a template only. All survey responses, customer names, interviewer names, photo links and results were deleted before publishing, including the pivot cache records. Sheets keep their headers, layout, formulas, pivot table and buttons.
 
 ## Problem
 
@@ -29,7 +29,7 @@ Result: the report run went from about 1 hour to 5–10 minutes, with consistent
 | Data | Survey responses table (`Form_Responses13`) |
 | Form Responses 1 | Raw Google Form export |
 | CUSTOMER SURVEY RATE | Survey rate per branch, formula-based, with the Export to PDF button |
-| MONTHLY SURVEY ACHIEVEMENT | Monthly achievement per dealer |
+| MONTHLY SURVEY ACHIEVEMENT | Pivot table of responses per branch per month, used as the source for the report sheets |
 | udah belum / udah belum (2) | Tracking of branches that have or have not run the survey |
 
 ## Files
@@ -41,7 +41,7 @@ Result: the report run went from about 1 hour to 5–10 minutes, with consistent
 ## Notes
 
 - `ExportPDF` reads from a sheet named `export`. Add or rename a sheet to `export` with the report layout before running it.
-- The Monthly Survey Achievement pivot table was removed together with its cached data. Recreate it from the `Form_Responses13` table if needed.
+- After importing data, refresh the pivot table on Monthly Survey Achievement (Data > Refresh All) so the report sheets update.
 - The delete-by-media and delete-by-keyword options open a form named `frmDeleteDataFast`, while the form in this workbook is `frmDeleteData`. Rename one of them so the names match.
 - The Olah Data button calls a `FillterData` macro that is not part of this workbook.
 - Enable macros when opening the file. Built for Microsoft Excel on Windows.
